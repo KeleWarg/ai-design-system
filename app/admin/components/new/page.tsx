@@ -43,6 +43,10 @@ export default function NewComponentPage() {
   const [extracting, setExtracting] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
   
+  // Component status
+  const [componentGenerated, setComponentGenerated] = useState(false)
+  const [componentSaved, setComponentSaved] = useState(false)
+  
   // Fetch themes on mount
   useEffect(() => {
     async function loadThemes() {
@@ -197,7 +201,9 @@ export default function NewComponentPage() {
         }))
       }
       
-      alert('✅ Component generated! Review the name below and click Save.')
+      // Mark as generated but not saved
+      setComponentGenerated(true)
+      alert('✅ Component generated successfully! Review the details below and click "Save Component" when ready.')
       
     } catch (error) {
       console.error('Error:', error)
@@ -340,11 +346,19 @@ export default function NewComponentPage() {
     
     try {
       await createComponent(formData)
-      router.push('/admin/components')
+      setComponentSaved(true)
+      
+      // Show success message with preview link
+      alert(`✅ Component "${formData.name}" saved successfully!\n\n📍 View live preview at: /docs/components/${formData.slug}`)
+      
+      // Small delay to show the success state, then redirect
+      setTimeout(() => {
+        router.push('/admin/components')
+      }, 1000)
     } catch (error: unknown) {
       console.error('Error creating component:', error)
       const message = error instanceof Error ? error.message : 'Failed to create component'
-      alert(message)
+      alert(`❌ Error: ${message}`)
     } finally {
       setLoading(false)
     }
@@ -540,11 +554,23 @@ export default function NewComponentPage() {
         {uploadedImage && formData.name && formData.code && (
           <div className="bg-card border border-border rounded-lg p-6 space-y-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">🎨 Component Preview</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Live preview with <strong>{selectedTheme?.name || 'current'}</strong> theme
-                </p>
+              <div className="flex items-center gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">🎨 Component Preview</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Live preview with <strong>{selectedTheme?.name || 'current'}</strong> theme
+                  </p>
+                </div>
+                {/* Status Badge */}
+                {componentSaved ? (
+                  <span className="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30 rounded-full text-xs font-medium animate-pulse">
+                    ✓ Saved
+                  </span>
+                ) : componentGenerated ? (
+                  <span className="px-3 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30 rounded-full text-xs font-medium">
+                    ⚠️ Draft - Not Saved
+                  </span>
+                ) : null}
               </div>
               {selectedTheme && (
                 <div className="flex gap-2">
@@ -559,6 +585,24 @@ export default function NewComponentPage() {
                 </div>
               )}
             </div>
+            
+            {/* Unsaved Warning */}
+            {componentGenerated && !componentSaved && (
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 mb-1">
+                      Component Not Saved Yet
+                    </p>
+                    <p className="text-xs text-yellow-600/80 dark:text-yellow-400/80">
+                      This component exists only in your browser. Click "Save Component" below to persist it to the database. 
+                      If you leave this page, your work will be lost!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Variant Grid */}
             <div className="space-y-4">
@@ -642,11 +686,21 @@ export default function NewComponentPage() {
           <div className="flex flex-col gap-4">
             <button
               type="submit"
-              disabled={loading || !formData.name}
-              className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 text-lg font-semibold"
+              disabled={loading || componentSaved || !formData.name}
+              className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 text-lg font-semibold shadow-lg"
             >
-              {loading ? '💾 Saving Component...' : '💾 Save Component'}
+              {componentSaved ? '✓ Component Saved!' : loading ? '💾 Saving Component...' : '💾 Save Component to Database'}
             </button>
+            {componentSaved && (
+              <a
+                href={`/docs/components/${formData.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-8 py-3 bg-gradient-to-r from-purple-500 to-primary text-white rounded-lg hover:opacity-90 transition-opacity text-base font-semibold text-center shadow-lg"
+              >
+                🎉 View Live Component →
+              </a>
+            )}
             <button
               type="button"
               onClick={() => router.back()}
