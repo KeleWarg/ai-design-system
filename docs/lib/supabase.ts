@@ -1,0 +1,73 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+// Lazy initialization for client
+let _supabase: SupabaseClient | null = null
+let _supabaseAdmin: SupabaseClient | null = null
+
+export const getSupabase = () => {
+  if (!_supabase) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing Supabase environment variables')
+      console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗')
+      console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✓' : '✗')
+    }
+    _supabase = createClient(supabaseUrl, supabaseAnonKey)
+  }
+  return _supabase
+}
+
+export const getSupabaseAdmin = () => {
+  if (!_supabaseAdmin) {
+    _supabaseAdmin = createClient(
+      supabaseUrl,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+  }
+  return _supabaseAdmin
+}
+
+// For backwards compatibility - client only
+export const supabase = getSupabase()
+
+// Server-side only - do NOT use in client components
+// Only call getSupabaseAdmin() in API routes or server components
+export const supabaseAdmin = typeof window === 'undefined' ? getSupabaseAdmin() : null as any
+
+// Types
+export type Theme = {
+  id: string
+  name: string
+  value: string
+  colors: Record<string, string>
+  typography?: Record<string, any>
+  spacing?: Record<string, any>
+  effects?: Record<string, any>
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export type Component = {
+  id: string
+  name: string
+  slug: string
+  description: string
+  category: string
+  code: string
+  props: Record<string, any>
+  variants: Record<string, any>
+  prompts: Record<string, any>
+  examples: any[]
+  installation: Record<string, any>
+  created_at: string
+  updated_at: string
+}

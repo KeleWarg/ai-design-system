@@ -1,0 +1,45 @@
+import { NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+import { generateComponentPrompt } from '@/lib/ai-prompts'
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+})
+
+export async function POST(request: Request) {
+  try {
+    const spec = await request.json()
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'Anthropic API key not configured' },
+        { status: 500 }
+      )
+    }
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 8192,
+      temperature: 0.7,
+      system: 'You are an expert React developer. Generate clean, type-safe component code following the exact pattern provided.',
+      messages: [
+        {
+          role: 'user',
+          content: generateComponentPrompt(spec)
+        }
+      ]
+    })
+
+    const code = message.content[0].type === 'text' ? message.content[0].text : ''
+
+    return NextResponse.json({ code })
+  } catch (error: any) {
+    console.error('AI generation error:', error)
+    return NextResponse.json(
+      { error: error?.message || 'Failed to generate component' },
+      { status: 500 }
+    )
+  }
+}
+
+
