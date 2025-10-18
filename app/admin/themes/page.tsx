@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getThemes, deleteTheme, setActiveTheme } from '@/lib/db/themes'
 import type { Theme } from '@/lib/supabase'
+import { usePermissions } from '@/hooks/use-permissions'
 
 export default function ThemesPage() {
   const [themes, setThemes] = useState<Theme[]>([])
   const [loading, setLoading] = useState(true)
+  const { canDelete } = usePermissions()
   
   useEffect(() => {
     loadThemes()
@@ -29,7 +31,17 @@ export default function ThemesPage() {
     if (!confirm('Delete this theme? This action cannot be undone.')) return
     
     try {
-      await deleteTheme(id)
+      const response = await fetch(`/api/admin/themes/${id}`, {
+        method: 'DELETE',
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        alert(data.error || 'Failed to delete theme')
+        return
+      }
+      
       loadThemes()
     } catch (error) {
       console.error('Error deleting theme:', error)
@@ -133,14 +145,16 @@ export default function ThemesPage() {
                   >
                     Edit
                   </Link>
-                  <button
-                    onClick={() => handleDelete(theme.id)}
-                    className="px-3 py-1 bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors text-sm"
-                    disabled={theme.is_active}
-                    title={theme.is_active ? 'Cannot delete active theme' : 'Delete theme'}
-                  >
-                    Delete
-                  </button>
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDelete(theme.id)}
+                      className="px-3 py-1 bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={theme.is_active}
+                      title={theme.is_active ? 'Cannot delete active theme' : 'Delete theme'}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

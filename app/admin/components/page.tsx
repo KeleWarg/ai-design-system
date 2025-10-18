@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getComponents, deleteComponent } from '@/lib/db/components'
 import type { Component } from '@/lib/supabase'
+import { usePermissions } from '@/hooks/use-permissions'
 
 export default function ComponentsPage() {
   const [components, setComponents] = useState<Component[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
+  const { canDelete } = usePermissions()
   
   useEffect(() => {
     loadComponents()
@@ -30,7 +32,17 @@ export default function ComponentsPage() {
     if (!confirm(`Delete component "${name}"? This action cannot be undone.`)) return
     
     try {
-      await deleteComponent(id)
+      const response = await fetch(`/api/admin/components/${id}`, {
+        method: 'DELETE',
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        alert(data.error || 'Failed to delete component')
+        return
+      }
+      
       loadComponents()
     } catch (error) {
       console.error('Error deleting component:', error)
@@ -130,12 +142,14 @@ export default function ComponentsPage() {
                           >
                             Edit
                           </Link>
-                          <button
-                            onClick={() => handleDelete(component.id, component.name)}
-                            className="px-3 py-1 bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors text-sm"
-                          >
-                            Delete
-                          </button>
+                          {canDelete && (
+                            <button
+                              onClick={() => handleDelete(component.id, component.name)}
+                              className="px-3 py-1 bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors text-sm"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
