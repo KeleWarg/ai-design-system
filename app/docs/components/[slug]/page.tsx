@@ -102,13 +102,102 @@ export default function ComponentDetailPage() {
       {/* Content */}
       <div className="container mx-auto px-6 py-12 max-w-6xl">
         {activeTab === 'preview' && (
-          <div className="space-y-6">
-            <div className="p-8 bg-card border border-border rounded-lg">
+          <div className="space-y-8">
+            {/* Component Info */}
+            <div className="p-6 bg-gradient-to-r from-primary/10 to-purple-500/10 border-2 border-primary/30 rounded-lg">
+              <h3 className="text-lg font-semibold text-foreground mb-2">💡 About This Component</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Component preview would render here. The actual component code needs to be dynamically evaluated and rendered.
+                {component.description}
               </p>
-              <div className="text-xs text-muted-foreground font-mono bg-muted p-4 rounded">
-                Note: Dynamic component rendering requires additional setup with safe code evaluation.
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 bg-background/50 rounded-md">
+                  <p className="text-xs text-muted-foreground mb-1">Category</p>
+                  <p className="text-sm font-medium text-foreground capitalize">{component.category}</p>
+                </div>
+                <div className="p-3 bg-background/50 rounded-md">
+                  <p className="text-xs text-muted-foreground mb-1">Slug</p>
+                  <p className="text-sm font-medium text-foreground font-mono">{component.slug}</p>
+                </div>
+                <div className="p-3 bg-background/50 rounded-md">
+                  <p className="text-xs text-muted-foreground mb-1">Variants</p>
+                  <p className="text-sm font-medium text-foreground">{Object.keys(component.variants).length} groups</p>
+                </div>
+                <div className="p-3 bg-background/50 rounded-md">
+                  <p className="text-xs text-muted-foreground mb-1">Theme</p>
+                  <p className="text-sm font-medium text-foreground">CSS Variables</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Variant Showcase */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">🎨 Available Variants</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(component.variants).map(([variantName, options]) => (
+                  <div key={variantName} className="p-4 bg-card border border-border rounded-lg">
+                    <p className="text-sm font-semibold text-foreground mb-3">{variantName}</p>
+                    <div className="space-y-2">
+                      {(options as string[]).map((option) => (
+                        <div
+                          key={option}
+                          className="p-2 bg-muted rounded text-xs text-center font-medium"
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Usage Example */}
+            <div className="p-6 bg-card border border-border rounded-lg space-y-4">
+              <h3 className="text-lg font-semibold text-foreground">📘 Usage Example</h3>
+              <pre className="p-4 bg-muted rounded-lg overflow-x-auto">
+                <code className="text-sm">
+{`import { ${component.name} } from '@/components/${component.slug}'
+
+export default function Example() {
+  return (
+    <${component.name}${Object.keys(component.variants).length > 0 ? `\n      ${Object.keys(component.variants)[0]}="${(component.variants[Object.keys(component.variants)[0]] as string[])[0]}"` : ''}
+    >
+      Click me
+    </${component.name}>
+  )
+}`}
+                </code>
+              </pre>
+            </div>
+
+            {/* Theme Tokens */}
+            <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+              <h3 className="text-lg font-semibold text-foreground">🎨 Theme-Aware Design</h3>
+              <p className="text-sm text-muted-foreground">
+                This component uses CSS variables from your active theme. Change themes in the admin panel to see this component adapt automatically.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['--primary', '--secondary', '--accent', '--foreground', '--background', '--border'].map(token => (
+                  <code key={token} className="px-3 py-1 bg-background rounded text-xs font-mono text-primary">
+                    var({token})
+                  </code>
+                ))}
+              </div>
+            </div>
+
+            {/* Interactive Preview Note */}
+            <div className="p-6 bg-muted border-2 border-dashed border-border rounded-lg text-center space-y-3">
+              <div className="text-4xl">🔧</div>
+              <h3 className="text-lg font-semibold text-foreground">Want to See It Live?</h3>
+              <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+                To use this component in your project, copy the code from the <strong>Code</strong> tab above 
+                and integrate it into your application. The component will render with your active theme automatically!
+              </p>
+              <div className="pt-3">
+                <p className="text-xs text-muted-foreground">
+                  💡 <strong>Developer Note:</strong> Interactive preview requires component registration. 
+                  See the Code tab for implementation details.
+                </p>
               </div>
             </div>
           </div>
