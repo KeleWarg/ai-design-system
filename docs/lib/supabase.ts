@@ -40,7 +40,7 @@ export const supabase = getSupabase()
 
 // Server-side only - do NOT use in client components
 // Only call getSupabaseAdmin() in API routes or server components
-export const supabaseAdmin = typeof window === 'undefined' ? getSupabaseAdmin() : null as any
+export const supabaseAdmin = typeof window === 'undefined' ? getSupabaseAdmin() : null as SupabaseClient | null
 
 // Types
 export type Theme = {
@@ -48,9 +48,9 @@ export type Theme = {
   name: string
   value: string
   colors: Record<string, string>
-  typography?: Record<string, any>
-  spacing?: Record<string, any>
-  effects?: Record<string, any>
+  typography?: Record<string, string | number>
+  spacing?: Record<string, string | number>
+  effects?: Record<string, string | number>
   is_active: boolean
   created_at: string
   updated_at: string
@@ -63,11 +63,11 @@ export type Component = {
   description: string
   category: string
   code: string
-  props: Record<string, any>
-  variants: Record<string, any>
-  prompts: Record<string, any>
-  examples: any[]
-  installation: Record<string, any>
+  props: Record<string, string | number | boolean>
+  variants: Record<string, string | number | boolean>
+  prompts: Record<string, string>
+  examples: Array<Record<string, unknown>>
+  installation: Record<string, string>
   created_at: string
   updated_at: string
 }
