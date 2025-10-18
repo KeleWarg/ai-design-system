@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { getActiveTheme } from '@/lib/db/themes'
 import type { Theme } from '@/lib/supabase'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -29,7 +29,7 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme | null>(null)
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     // Load active theme from database
     async function loadTheme() {
@@ -48,15 +48,16 @@ export function ThemeProvider({
         setLoading(false)
       }
     }
-    
+
     // Only load if we're in the browser
     if (typeof window !== 'undefined') {
       loadTheme()
     } else {
       setLoading(false)
     }
-    
+
     // Subscribe to theme changes in real-time
+    const supabase = getSupabase()
     const channel = supabase
       .channel('theme-changes')
       .on(
@@ -76,7 +77,7 @@ export function ThemeProvider({
         }
       )
       .subscribe()
-    
+
     return () => {
       supabase.removeChannel(channel)
     }
