@@ -115,3 +115,6 @@ export async function setActiveTheme(id: string): Promise<void> {
     throw activateError
   }
 }
+
+// Alias for backward compatibility
+export const getTheme = getThemeById

@@ -38,10 +38,11 @@ export async function POST(request: Request) {
     const prompts = JSON.parse(content)
 
     return NextResponse.json(prompts)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI generation error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to generate prompts'
     return NextResponse.json(
-      { error: error?.message || 'Failed to generate prompts' },
+      { error: message },
       { status: 500 }
     )
   }

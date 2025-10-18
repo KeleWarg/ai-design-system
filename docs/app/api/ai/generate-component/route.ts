@@ -33,10 +33,11 @@ export async function POST(request: Request) {
     const code = message.content[0].type === 'text' ? message.content[0].text : ''
 
     return NextResponse.json({ code })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI generation error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to generate component'
     return NextResponse.json(
-      { error: error?.message || 'Failed to generate component' },
+      { error: message },
       { status: 500 }
     )
   }

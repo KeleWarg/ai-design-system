@@ -38,10 +38,11 @@ export async function POST(request: Request) {
     const docs = JSON.parse(content)
 
     return NextResponse.json(docs)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI generation error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to generate docs'
     return NextResponse.json(
-      { error: error?.message || 'Failed to generate docs' },
+      { error: message },
       { status: 500 }
     )
   }

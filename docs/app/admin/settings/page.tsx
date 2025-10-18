@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { hashPassword } from '@/lib/auth'
 
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -43,7 +42,7 @@ export default function SettingsPage() {
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to change password' })
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'An error occurred' })
     } finally {
       setLoading(false)

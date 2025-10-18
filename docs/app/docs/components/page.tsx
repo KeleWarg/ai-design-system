@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { getComponents } from '@/lib/db/components'
 import type { Component } from '@/lib/supabase'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 export default function ComponentsIndexPage() {
   const [components, setComponents] = useState<Component[]>([])

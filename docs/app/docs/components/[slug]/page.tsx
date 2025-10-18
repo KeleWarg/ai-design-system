@@ -210,7 +210,7 @@ export default function ComponentDetailPage() {
                   {component.prompts.useCases.map((useCase: any, i: number) => (
                     <div key={i} className="p-4 bg-card border border-border rounded-lg">
                       <h4 className="font-medium text-foreground mb-2">{useCase.scenario}</h4>
-                      <p className="text-sm text-muted-foreground mb-3">Prompt: "{useCase.prompt}"</p>
+                      <p className="text-sm text-muted-foreground mb-3">Prompt: &quot;{useCase.prompt}&quot;</p>
                       {useCase.output && (
                         <pre className="p-3 bg-muted rounded text-xs overflow-x-auto">
                           <code>{useCase.output}</code>

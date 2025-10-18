@@ -163,9 +163,10 @@ export default function NewComponentPage() {
     try {
       await createComponent(formData)
       router.push('/admin/components')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating component:', error)
-      alert(error.message || 'Failed to create component')
+      const message = error instanceof Error ? error.message : 'Failed to create component'
+      alert(message)
     } finally {
       setLoading(false)
     }

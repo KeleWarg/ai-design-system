@@ -25,8 +25,6 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light',
-  storageKey = 'design-system-theme',
   ...props
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme | null>(null)
@@ -68,7 +66,7 @@ export function ThemeProvider({
           schema: 'public',
           table: 'themes'
         },
-        async (payload) => {
+        async () => {
           // Reload active theme when any theme is updated
           const activeTheme = await getActiveTheme()
           if (activeTheme) {

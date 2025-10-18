@@ -65,9 +65,10 @@ export default function NewThemePage() {
     try {
       await createTheme(formData)
       router.push('/admin/themes')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating theme:', error)
-      alert(error.message || 'Failed to create theme')
+      const message = error instanceof Error ? error.message : 'Failed to create theme'
+      alert(message)
     } finally {
       setLoading(false)
     }

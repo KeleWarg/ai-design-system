@@ -22,8 +22,9 @@ export default function EditComponentPage() {
   
   useEffect(() => {
     loadComponent()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
-  
+
   async function loadComponent() {
     try {
       const data = await getComponentById(params.id as string)
@@ -145,9 +146,10 @@ export default function EditComponentPage() {
         installation: component.installation
       })
       router.push('/admin/components')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating component:', error)
-      alert(error.message || 'Failed to update component')
+      const message = error instanceof Error ? error.message : 'Failed to update component'
+      alert(message)
     } finally {
       setSaving(false)
     }

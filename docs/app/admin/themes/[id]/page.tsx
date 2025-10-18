@@ -14,8 +14,9 @@ export default function EditThemePage() {
   
   useEffect(() => {
     loadTheme()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
-  
+
   async function loadTheme() {
     try {
       const data = await getTheme(params.id as string)
@@ -49,9 +50,10 @@ export default function EditThemePage() {
         is_active: theme.is_active
       })
       router.push('/admin/themes')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating theme:', error)
-      alert(error.message || 'Failed to update theme')
+      const message = error instanceof Error ? error.message : 'Failed to update theme'
+      alert(message)
     } finally {
       setSaving(false)
     }
