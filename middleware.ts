@@ -1,30 +1,78 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  // Check if accessing admin routes
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: any) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
+    }
+  )
+
+  // Check if accessing admin routes (except login)
   if (request.nextUrl.pathname.startsWith('/admin')) {
     // Skip login page
     if (request.nextUrl.pathname === '/admin/login') {
-      return NextResponse.next()
+      return response
     }
     
-    // Check for auth cookie
-    const authCookie = request.cookies.get('admin_session')
+    // Check authentication
+    const { data: { user } } = await supabase.auth.getUser()
     
-    if (!authCookie) {
+    if (!user) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
-    
-    // For MVP, just check cookie exists
-    // In production, verify JWT token
   }
   
-  return NextResponse.next()
+  return response
 }
 
 export const config = {
   matcher: '/admin/:path*',
 }
-
-

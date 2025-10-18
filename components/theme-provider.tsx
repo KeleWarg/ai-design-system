@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { getActiveTheme } from '@/lib/db/themes'
 import type { Theme } from '@/lib/supabase'
-import { getSupabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -51,7 +51,7 @@ export function ThemeProvider({
       loadTheme()
 
       // Subscribe to theme changes in real-time
-      const supabase = getSupabase()
+      const supabase = createClient()
       const channel = supabase
         .channel('theme-changes')
         .on(

@@ -2,6 +2,8 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { usePermissions } from '@/hooks/use-permissions'
+import { createClient } from '@/lib/supabase'
 
 export default function AdminLayout({
   children,
@@ -10,10 +12,13 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { user, isAdmin } = usePermissions()
+  const supabase = createClient()
   
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
+    await supabase.auth.signOut()
     router.push('/admin/login')
+    router.refresh()
   }
   
   // Don't show layout on login page
@@ -55,7 +60,15 @@ export default function AdminLayout({
             )
           })}
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-2">
+          {user && (
+            <div className="px-3 py-2 rounded-md bg-accent/50 mb-2">
+              <p className="text-xs font-medium text-foreground">{user.email}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                {isAdmin ? '👑 Admin' : '✏️ Editor'}
+              </p>
+            </div>
+          )}
           <button
             onClick={handleLogout}
             className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-md hover:bg-accent"

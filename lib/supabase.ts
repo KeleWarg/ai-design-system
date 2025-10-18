@@ -1,50 +1,77 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Lazy initialization for client
-let _supabase: SupabaseClient | null = null
-let _supabaseAdmin: SupabaseClient | null = null
+export type UserRole = 'admin' | 'editor'
 
-export const getSupabase = () => {
-  if (!_supabase) {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Missing Supabase environment variables')
-      console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗')
-      console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✓' : '✗')
+export type User = {
+  id: string
+  email: string
+  role: UserRole
+  created_at: string
+  updated_at: string
+}
+
+// Client-side Supabase client for use in Client Components
+export function createClient() {
+  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+}
+
+// Server-side Supabase client for use in Server Components and API Routes
+export async function createServerSupabaseClient() {
+  const cookieStore = await cookies()
+  
+  return createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
     }
-    _supabase = createClient(supabaseUrl, supabaseAnonKey)
-  }
-  return _supabase
+  )
 }
 
-export const getSupabaseAdmin = () => {
-  if (!_supabaseAdmin) {
-    _supabaseAdmin = createClient(
-      supabaseUrl,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+// Get current authenticated user with role
+export async function getCurrentUser(): Promise<User | null> {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  
+  if (!authUser) return null
+  
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', authUser.id)
+    .single()
+  
+  if (error || !data) {
+    console.error('Error fetching user:', error)
+    return null
+  }
+  
+  return data as User
+}
+
+// Legacy admin client for migrations (use sparingly)
+export function getSupabaseAdmin() {
+  const { createClient } = require('@supabase/supabase-js')
+  return createClient(
+    supabaseUrl,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
       }
-    )
-  }
-  return _supabaseAdmin
+    }
+  )
 }
-
-// For backwards compatibility - client only
-// Use getSupabase() function instead to avoid build-time initialization
-let _cachedSupabase: SupabaseClient | null = null
-export const supabase = typeof window !== 'undefined'
-  ? (_cachedSupabase || (_cachedSupabase = getSupabase()))
-  : (null as unknown as SupabaseClient)
-
-// Server-side only - do NOT use in client components
-// Only call getSupabaseAdmin() in API routes or server components
-export const supabaseAdmin = (null as unknown as SupabaseClient)
 
 // Types
 export type Theme = {
