@@ -47,41 +47,102 @@ export default function NewComponentPage() {
     
     // Extract spec from image
     setExtracting(true)
+    setAiLoading('extracting')
+    
     try {
+      // Step 1: Extract spec from image
       const formData = new FormData()
       formData.append('image', file)
       
-      const res = await fetch('/api/ai/extract-spec', {
+      const extractRes = await fetch('/api/ai/extract-spec', {
         method: 'POST',
         body: formData
       })
       
-      const data = await res.json()
+      const extractedData = await extractRes.json()
       
-      if (res.ok) {
-        // Populate form with extracted data
-        setFormData(prev => ({
-          ...prev,
-          name: data.name || prev.name,
-          slug: (data.name || prev.name).toLowerCase().replace(/\s+/g, '-'),
-          description: data.description || prev.description,
-          category: data.category || prev.category,
-          variants: data.variants || prev.variants
-        }))
-        
-        if (data.notes) {
-          alert(`Extracted! Additional notes: ${data.notes}`)
-        } else {
-          alert('✅ Spec extracted successfully! Review the form below.')
-        }
-      } else {
-        alert(data.error || 'Failed to extract spec from image')
+      if (!extractRes.ok) {
+        alert(extractedData.error || 'Failed to extract spec from image')
+        return
       }
+      
+      // Populate form with extracted data
+      const newFormData = {
+        ...formData,
+        name: extractedData.name || '',
+        slug: (extractedData.name || '').toLowerCase().replace(/\s+/g, '-'),
+        description: extractedData.description || '',
+        category: extractedData.category || 'other',
+        variants: extractedData.variants || {}
+      }
+      
+      setFormData(prev => ({ ...prev, ...newFormData }))
+      
+      // Step 2: Auto-generate code
+      setAiLoading('code')
+      const codeRes = await fetch('/api/ai/generate-component', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFormData.name,
+          description: newFormData.description,
+          variants: newFormData.variants,
+          props: []
+        })
+      })
+      
+      const codeData = await codeRes.json()
+      if (codeRes.ok && codeData.code) {
+        setFormData(prev => ({ ...prev, code: codeData.code }))
+      }
+      
+      // Step 3: Auto-generate prompts
+      setAiLoading('prompts')
+      const promptsRes = await fetch('/api/ai/generate-prompts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFormData.name,
+          description: newFormData.description,
+          variants: newFormData.variants
+        })
+      })
+      
+      const promptsData = await promptsRes.json()
+      if (promptsRes.ok) {
+        setFormData(prev => ({ ...prev, prompts: promptsData }))
+      }
+      
+      // Step 4: Auto-generate documentation
+      setAiLoading('docs')
+      const docsRes = await fetch('/api/ai/generate-docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFormData.name,
+          code: codeData.code,
+          variants: newFormData.variants
+        })
+      })
+      
+      const docsData = await docsRes.json()
+      if (docsRes.ok) {
+        setFormData(prev => ({ 
+          ...prev, 
+          props: docsData.api?.props || {},
+          installation: docsData.installation || { dependencies: [], setupSteps: [] },
+          examples: docsData.examples || []
+        }))
+      }
+      
+      alert('✅ Component generated! Review the name below and click Save.')
+      
     } catch (error) {
       console.error('Error:', error)
-      alert('Failed to extract spec from image')
+      alert('Failed to process spec sheet')
     } finally {
       setExtracting(false)
+      setAiLoading(null)
     }
   }
   
@@ -228,69 +289,77 @@ export default function NewComponentPage() {
   }
   
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Create Component</h1>
-        <p className="text-muted-foreground mt-1">Upload a spec sheet image or define manually</p>
+        <p className="text-muted-foreground mt-1">Upload a spec sheet - AI will handle the rest</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Image Upload */}
-        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-2 border-dashed border-primary/30 rounded-lg p-6 space-y-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                📸 Upload Spec Sheet (PNG)
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Upload a design spec or mockup - AI will extract component details automatically
-              </p>
+        {/* Image Upload - Primary Action */}
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-2 border-dashed border-primary/30 rounded-lg p-8 space-y-4">
+          <div className="text-center">
+            <div className="text-5xl mb-4">
+              {extracting ? '🤖' : uploadedImage ? '✅' : '📸'}
             </div>
-            <label className="cursor-pointer px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium">
-              {extracting ? '🤖 Extracting...' : '📤 Upload Image'}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp"
-                onChange={handleImageUpload}
-                disabled={extracting}
-                className="hidden"
-              />
-            </label>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              {extracting ? 'AI is Processing...' : uploadedImage ? 'Spec Uploaded!' : 'Upload Your Spec Sheet'}
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              {extracting ? (
+                <span>
+                  {aiLoading === 'extracting' && '📄 Reading image...'}
+                  {aiLoading === 'code' && '💻 Generating component code...'}
+                  {aiLoading === 'prompts' && '💬 Creating usage prompts...'}
+                  {aiLoading === 'docs' && '📚 Writing documentation...'}
+                </span>
+              ) : uploadedImage ? (
+                'Component generated! Review the name and click Save.'
+              ) : (
+                'PNG, JPG, JPEG, or WebP - AI will extract everything automatically'
+              )}
+            </p>
+            
+            {!extracting && (
+              <label className="cursor-pointer inline-block px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-lg">
+                {uploadedImage ? '📤 Upload Different Spec' : '📤 Upload Spec Sheet'}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={handleImageUpload}
+                  disabled={extracting}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
           
           {uploadedImage && (
-            <div className="mt-4 space-y-2">
-              <p className="text-sm font-medium text-foreground">Uploaded Spec:</p>
-              <div className="relative rounded-lg overflow-hidden border-2 border-primary/30 bg-background">
+            <div className="mt-6">
+              <div className="relative rounded-lg overflow-hidden border-2 border-primary/30 bg-background mx-auto max-w-2xl">
                 <img 
                   src={uploadedImage} 
                   alt="Uploaded spec" 
-                  className="max-h-64 w-auto mx-auto"
+                  className="w-full h-auto"
                 />
               </div>
-              {extracting && (
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                  <span>AI is reading your spec sheet...</span>
-                </div>
-              )}
             </div>
           )}
           
-          {!uploadedImage && (
-            <div className="text-center py-8 text-muted-foreground">
-              <div className="text-4xl mb-2">📄</div>
-              <p className="text-sm">No spec sheet uploaded yet</p>
-              <p className="text-xs mt-1">Supports PNG, JPG, JPEG, WebP</p>
+          {extracting && (
+            <div className="flex justify-center">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
             </div>
           )}
         </div>
         
-        {/* Basic Info */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">Basic Information</h2>
-          
-          <div className="grid grid-cols-2 gap-4">
+        {/* Component Name - Only Editable Field */}
+        {uploadedImage && formData.name && (
+          <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+            <h2 className="text-xl font-semibold text-foreground">Component Name</h2>
+            <p className="text-sm text-muted-foreground">You can rename the component if needed</p>
+            
+            <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                 Component Name *
@@ -324,161 +393,39 @@ export default function NewComponentPage() {
               />
             </div>
           </div>
-          
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1">
-              Description *
-            </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground"
-              rows={3}
-              placeholder="Describe what this component does..."
-              required
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-foreground mb-1">
-              Category *
-            </label>
-            <select
-              id="category"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground"
-              required
-            >
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        {/* Variants */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">Variants</h2>
-          
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Variant key (e.g., Type, Size)"
-              value={variantKey}
-              onChange={(e) => setVariantKey(e.target.value)}
-              className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground"
-            />
-            <input
-              type="text"
-              placeholder="Values (comma-separated: Primary, Secondary)"
-              value={variantValues}
-              onChange={(e) => setVariantValues(e.target.value)}
-              className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground"
-            />
-            <button
-              type="button"
-              onClick={addVariant}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
-            >
-              Add
-            </button>
-          </div>
-          
-          {Object.entries(formData.variants).length > 0 && (
-            <div className="space-y-2">
-              {Object.entries(formData.variants).map(([key, values]) => (
-                <div key={key} className="flex items-center justify-between p-3 bg-accent rounded-md">
-                  <div>
-                    <span className="font-medium">{key}:</span>{' '}
-                    <span className="text-sm text-muted-foreground">{values.join(', ')}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeVariant(key)}
-                    className="text-destructive hover:text-destructive/80"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+            
+            {/* Summary of generated content */}
+            <div className="mt-4 p-4 bg-muted rounded-md space-y-2">
+              <p className="text-sm font-medium text-foreground">✅ Generated Automatically:</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Description: {formData.description}</li>
+                <li>• Category: {formData.category}</li>
+                <li>• Variants: {Object.keys(formData.variants).length} variant groups</li>
+                <li>• Component code, prompts & documentation</li>
+              </ul>
             </div>
-          )}
-        </div>
-        
-        {/* Code */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-foreground">Component Code</h2>
-            <button
-              type="button"
-              onClick={handleGenerateCode}
-              disabled={aiLoading === 'code'}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 text-sm"
-            >
-              {aiLoading === 'code' ? '🤖 Generating...' : '🤖 Generate with AI'}
-            </button>
           </div>
-          
-          <div className="border border-input rounded-md overflow-hidden">
-            <MonacoEditor
-              height="400px"
-              defaultLanguage="typescript"
-              value={formData.code}
-              onChange={(value) => setFormData({ ...formData, code: value || '' })}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                wordWrap: 'on'
-              }}
-            />
-          </div>
-        </div>
+        )}
         
-        {/* AI Actions */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">AI Generation</h2>
-          <div className="flex gap-4">
+        {/* Actions - Only show after component is generated */}
+        {uploadedImage && formData.name && formData.code && (
+          <div className="flex flex-col gap-4">
             <button
-              type="button"
-              onClick={handleGeneratePrompts}
-              disabled={aiLoading === 'prompts'}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 disabled:opacity-50"
+              type="submit"
+              disabled={loading || !formData.name}
+              className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 text-lg font-semibold"
             >
-              {aiLoading === 'prompts' ? 'Generating...' : 'Generate Usage Prompts'}
+              {loading ? '💾 Saving Component...' : '💾 Save Component'}
             </button>
             <button
               type="button"
-              onClick={handleGenerateDocs}
-              disabled={aiLoading === 'docs'}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 disabled:opacity-50"
+              onClick={() => router.back()}
+              className="w-full px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
             >
-              {aiLoading === 'docs' ? 'Generating...' : 'Generate Documentation'}
+              Cancel
             </button>
           </div>
-        </div>
-        
-        {/* Actions */}
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Creating...' : 'Create Component'}
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
+        )}
       </form>
     </div>
   )
