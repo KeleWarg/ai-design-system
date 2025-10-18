@@ -8,10 +8,10 @@ import { getSupabase } from '@/lib/supabase'
  */
 export async function GET(
   request: Request,
-  { params }: { params: { value: string } }
+  { params }: { params: Promise<{ value: string }> }
 ) {
   try {
-    const { value } = params
+    const { value } = await params
 
     const supabase = getSupabase()
     const { data, error } = await supabase

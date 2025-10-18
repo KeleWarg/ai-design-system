@@ -64,8 +64,8 @@ export type Component = {
   category: string
   code: string
   props: Record<string, string | number | boolean>
-  variants: Record<string, string | number | boolean>
-  prompts: Record<string, string>
+  variants: Record<string, string | string[]>
+  prompts: Record<string, string | string[]>
   examples: Array<Record<string, unknown>>
   installation: Record<string, string>
   created_at: string
