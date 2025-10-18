@@ -129,25 +129,139 @@ export default function ComponentDetailPage() {
               </div>
             </div>
 
-            {/* Variant Showcase */}
+            {/* Visual Preview - Rendered Examples */}
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">🎨 Available Variants</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(component.variants).map(([variantName, options]) => (
-                  <div key={variantName} className="p-4 bg-card border border-border rounded-lg">
-                    <p className="text-sm font-semibold text-foreground mb-3">{variantName}</p>
-                    <div className="space-y-2">
-                      {(options as string[]).map((option) => (
-                        <div
-                          key={option}
-                          className="p-2 bg-muted rounded text-xs text-center font-medium"
+              <h3 className="text-lg font-semibold text-foreground mb-4">🎨 Visual Preview</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Examples of this component with different variant combinations
+              </p>
+              
+              {/* Type Variants (if exists) */}
+              {component.variants.Type && (
+                <div className="mb-8 p-6 bg-card border border-border rounded-lg">
+                  <p className="text-sm font-semibold text-foreground mb-4">Type Variants</p>
+                  <div className="flex flex-wrap gap-4">
+                    {(component.variants.Type as string[]).map((type) => {
+                      // Map variant names to Tailwind classes
+                      const typeClasses = {
+                        Primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+                        Secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+                        Ghost: 'bg-transparent border-2 border-border text-foreground hover:bg-accent',
+                        White: 'bg-white text-black hover:bg-white/90 border border-border',
+                        Destructive: 'bg-red-500 text-white hover:bg-red-600',
+                        Outline: 'bg-transparent border-2 border-primary text-primary hover:bg-primary/10',
+                      }[type] || 'bg-primary text-primary-foreground'
+                      
+                      return (
+                        <button
+                          key={type}
+                          className={`px-6 py-3 rounded-md font-medium transition-colors cursor-default ${typeClasses}`}
                         >
-                          {option}
-                        </div>
-                      ))}
-                    </div>
+                          {type} {component.name}
+                        </button>
+                      )
+                    })}
                   </div>
-                ))}
+                </div>
+              )}
+              
+              {/* Size Variants (if exists) */}
+              {component.variants.Size && (
+                <div className="mb-8 p-6 bg-card border border-border rounded-lg">
+                  <p className="text-sm font-semibold text-foreground mb-4">Size Variants</p>
+                  <div className="flex flex-wrap items-center gap-4">
+                    {(component.variants.Size as string[]).map((size) => {
+                      const sizeClasses = {
+                        Small: 'px-3 py-1.5 text-xs',
+                        Base: 'px-4 py-2 text-sm',
+                        Medium: 'px-5 py-2.5 text-sm',
+                        Large: 'px-6 py-3 text-base',
+                        XLarge: 'px-8 py-4 text-lg',
+                      }[size] || 'px-4 py-2 text-sm'
+                      
+                      return (
+                        <button
+                          key={size}
+                          className={`bg-primary text-primary-foreground rounded-md font-medium transition-colors cursor-default hover:bg-primary/90 ${sizeClasses}`}
+                        >
+                          {size}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* State Variants (if exists) */}
+              {component.variants.State && (
+                <div className="mb-8 p-6 bg-card border border-border rounded-lg">
+                  <p className="text-sm font-semibold text-foreground mb-4">State Variants</p>
+                  <div className="flex flex-wrap gap-4">
+                    {(component.variants.State as string[]).map((state) => {
+                      const stateClasses = {
+                        Enabled: 'bg-primary text-primary-foreground',
+                        Hover: 'bg-primary/90 text-primary-foreground',
+                        Focused: 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2',
+                        Pressed: 'bg-primary/80 text-primary-foreground',
+                        Disabled: 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed',
+                        Active: 'bg-primary/95 text-primary-foreground',
+                      }[state] || 'bg-primary text-primary-foreground'
+                      
+                      return (
+                        <button
+                          key={state}
+                          className={`px-6 py-3 rounded-md font-medium transition-colors cursor-default ${stateClasses}`}
+                        >
+                          {state}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* Icon Variants (if exists) */}
+              {component.variants.Icon && (
+                <div className="mb-8 p-6 bg-card border border-border rounded-lg">
+                  <p className="text-sm font-semibold text-foreground mb-4">Icon Variants</p>
+                  <div className="flex flex-wrap gap-4">
+                    {(component.variants.Icon as string[]).map((icon) => {
+                      return (
+                        <button
+                          key={icon}
+                          className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium transition-colors cursor-default hover:bg-primary/90 flex items-center gap-2"
+                        >
+                          {icon === 'Left' && <span>←</span>}
+                          {icon} Icon
+                          {icon === 'Right' && <span>→</span>}
+                          {icon === 'None' && ''}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* All Variants Grid (metadata view) */}
+              <div className="p-6 bg-muted/50 rounded-lg border border-border">
+                <p className="text-sm font-semibold text-foreground mb-4">All Variant Options</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(component.variants).map(([variantName, options]) => (
+                    <div key={variantName}>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">{variantName}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {(options as string[]).map((option) => (
+                          <span
+                            key={option}
+                            className="px-2 py-1 bg-background border border-border rounded text-xs"
+                          >
+                            {option}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
