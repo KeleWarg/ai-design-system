@@ -333,6 +333,56 @@ export default function EditComponentPage() {
           </div>
         </div>
         
+        {/* Component Preview */}
+        <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground">🎨 Component Preview</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Current component configuration
+            </p>
+          </div>
+          
+          {/* Variant Grid */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-foreground">Active Variants:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(component.variants).map(([variantName, options]) => (
+                <div key={variantName} className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm font-semibold text-foreground mb-2">{variantName}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.isArray(options) ? options.map((option) => (
+                      <span
+                        key={option}
+                        className="px-3 py-1 bg-background border border-border rounded-md text-xs text-foreground"
+                      >
+                        {option}
+                      </span>
+                    )) : (
+                      <span className="text-xs text-muted-foreground">Invalid variant options</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Live Preview Link */}
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-sm font-medium text-foreground mb-2">👁️ View Live Component:</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              See this component rendered with all variants on the public docs page
+            </p>
+            <a
+              href={`/docs/components/${component.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium"
+            >
+              Open Live Preview →
+            </a>
+          </div>
+        </div>
+        
         {/* Actions */}
         <div className="flex gap-4">
           <button
@@ -349,6 +399,14 @@ export default function EditComponentPage() {
           >
             Cancel
           </button>
+          <a
+            href={`/docs/components/${component.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors inline-flex items-center gap-2"
+          >
+            👁️ Preview
+          </a>
         </div>
       </form>
     </div>

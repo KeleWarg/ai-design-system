@@ -137,6 +137,15 @@ export default function ComponentsPage() {
                         
                         <div className="flex gap-2">
                           <Link
+                            href={`/docs/components/${component.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors text-sm inline-flex items-center gap-1"
+                            title="View live preview"
+                          >
+                            👁️ Preview
+                          </Link>
+                          <Link
                             href={`/admin/components/${component.id}`}
                             className="px-3 py-1 bg-accent text-accent-foreground rounded hover:bg-accent/90 transition-colors text-sm"
                           >

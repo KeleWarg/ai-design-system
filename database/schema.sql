@@ -66,17 +66,23 @@ CREATE POLICY "Users can read their own data"
   TO authenticated
   USING (auth.uid() = id);
 
+-- Create helper function to check admin role (bypasses RLS)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 DROP POLICY IF EXISTS "Admins can read all users" ON users;
 CREATE POLICY "Admins can read all users"
   ON users FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE users.id = auth.uid()
-      AND users.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- RLS Policies for Themes Table
 DROP POLICY IF EXISTS "Anyone can read themes" ON themes;

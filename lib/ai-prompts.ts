@@ -3,6 +3,13 @@ export function generateComponentPrompt(spec: {
   description: string
   variants: Record<string, string[]>
   props: Array<{ name: string; type: string; required: boolean }>
+  theme?: {
+    name: string
+    colors: Record<string, string>
+    typography?: Record<string, unknown>
+    spacing?: Record<string, unknown>
+  }
+  colorMapping?: Record<string, string>
 }) {
   return `Generate a React component following this exact pattern from our design system:
 
@@ -11,17 +18,33 @@ Description: ${spec.description}
 Variants: ${JSON.stringify(spec.variants, null, 2)}
 Props: ${JSON.stringify(spec.props, null, 2)}
 
+${spec.theme ? `
+THEME: ${spec.theme.name}
+Available color tokens: ${Object.keys(spec.theme.colors).join(', ')}
+${spec.colorMapping ? `Color Mapping: ${JSON.stringify(spec.colorMapping, null, 2)}` : ''}
+
+🎨 CRITICAL COLOR RULES:
+- NEVER use hardcoded colors (no #hex, no rgb())
+- ALWAYS use Tailwind classes with theme tokens: bg-primary, text-foreground, border-border
+- For hover states: hover:bg-primary-hover, hover:text-primary-foreground
+- For active states: active:bg-primary-active
+- For disabled: disabled:opacity-50, disabled:cursor-not-allowed
+- For custom values, use CSS variables: var(--primary), var(--foreground)
+- Follow the color mapping provided above
+` : ''}
+
 CRITICAL Requirements (match existing Button component):
 1. Use "use client" directive for Next.js
 2. Import: class-variance-authority, cn from "../../lib/utils"
 3. Variant names MUST be PascalCase (Type, Size, Icon, State)
 4. Variant options MUST be PascalCase (Primary, Secondary, Large, Small)
-5. Use CSS variables: var(--button-height-sm), var(--duration-base)
-6. Use theme token classes: bg-primary, text-primary-foreground, hover:bg-primary-hover
-7. Use semantic HTML element (button, div, etc.)
-8. Forward refs: React.forwardRef<HTMLElement, ComponentProps>
-9. Export both Component and componentVariants
-10. Support native HTML attributes via spread
+5. Use CSS variables for spacing/sizing: var(--button-height-sm), var(--duration-base)
+6. Use theme token classes for colors: bg-primary, text-primary-foreground, hover:bg-primary-hover
+7. NEVER hardcode colors - use theme tokens from the mapping above
+8. Use semantic HTML element (button, div, etc.)
+9. Forward refs: React.forwardRef<HTMLElement, ComponentProps>
+10. Export both Component and componentVariants
+11. Support native HTML attributes via spread
 
 Example structure:
 \`\`\`typescript

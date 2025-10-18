@@ -19,6 +19,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData()
     const file = formData.get('image') as File
+    const themeJson = formData.get('theme') as string
     
     if (!file) {
       return NextResponse.json(
@@ -32,6 +33,14 @@ export async function POST(request: Request) {
         { error: 'Anthropic API key not configured' },
         { status: 500 }
       )
+    }
+
+    // Parse theme data
+    let theme = null
+    try {
+      theme = themeJson ? JSON.parse(themeJson) : null
+    } catch (e) {
+      console.error('Error parsing theme:', e)
     }
 
     // Convert file to base64
@@ -70,18 +79,37 @@ export async function POST(request: Request) {
     "VariantName": ["option1", "option2", "option3"],
     "AnotherVariant": ["value1", "value2"]
   },
+  "colorMapping": {
+    "specColor1": "themeToken",
+    "specColor2": "themeToken"
+  },
   "notes": "Any additional notes or requirements you see in the spec"
 }
+
+${theme ? `
+THEME CONTEXT (${theme.name}):
+Available color tokens: ${Object.entries(theme.colors).map(([key, value]) => `${key}: ${value}`).join(', ')}
+${theme.typography ? `Typography: ${JSON.stringify(theme.typography, null, 2)}` : ''}
+${theme.spacing ? `Spacing: ${JSON.stringify(theme.spacing, null, 2)}` : ''}
+
+IMPORTANT: Map all colors you see in the spec to the closest theme token:
+- Look at the actual hex/RGB values of colors in the spec
+- Match them to the theme's color tokens
+- Return the mapping in "colorMapping" as { "specColorName": "themeTokenName" }
+- For example: { "Primary Button": "primary", "Secondary Background": "secondary", "Text Color": "foreground" }
+- The generated component will use CSS variables (var(--primary), var(--secondary), etc.) instead of hardcoded colors
+` : ''}
 
 Rules:
 1. Extract all visible variants and their options
 2. Variant names should be PascalCase (Type, Size, Color, etc.)
 3. Variant options should be PascalCase (Primary, Secondary, Small, Large, etc.)
-4. If you see colors, extract them as a Color variant
+4. If you see colors, extract them AND map them to theme tokens in "colorMapping"
 5. If you see sizes, extract them as a Size variant
 6. Look for states like hover, active, disabled - add as State variant
 7. If category is unclear, use "other"
 8. Include all text, measurements, and specifications you can see
+${theme ? '9. CRITICAL: Provide accurate color mappings from spec colors to theme tokens' : ''}
 
 Return ONLY valid JSON, no explanations or markdown.`
             }
