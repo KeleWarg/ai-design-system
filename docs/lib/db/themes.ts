@@ -1,7 +1,8 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import type { Theme } from '@/lib/supabase'
 
 export async function getThemes(): Promise<Theme[]> {
+  const supabase = getSupabase()
   const { data, error } = await supabase
     .from('themes')
     .select('*')
@@ -16,6 +17,7 @@ export async function getThemes(): Promise<Theme[]> {
 }
 
 export async function getActiveTheme(): Promise<Theme | null> {
+  const supabase = getSupabase()
   const { data, error } = await supabase
     .from('themes')
     .select('*')
@@ -35,6 +37,7 @@ export async function getActiveTheme(): Promise<Theme | null> {
 }
 
 export async function getThemeById(id: string): Promise<Theme | null> {
+  const supabase = getSupabase()
   const { data, error } = await supabase
     .from('themes')
     .select('*')
@@ -50,6 +53,7 @@ export async function getThemeById(id: string): Promise<Theme | null> {
 }
 
 export async function createTheme(theme: Partial<Theme>): Promise<Theme> {
+  const supabase = getSupabase()
   const { data, error } = await supabase
     .from('themes')
     .insert([theme])
@@ -65,6 +69,7 @@ export async function createTheme(theme: Partial<Theme>): Promise<Theme> {
 }
 
 export async function updateTheme(id: string, updates: Partial<Theme>): Promise<Theme> {
+  const supabase = getSupabase()
   const { data, error } = await supabase
     .from('themes')
     .update(updates)
@@ -81,6 +86,7 @@ export async function updateTheme(id: string, updates: Partial<Theme>): Promise<
 }
 
 export async function deleteTheme(id: string): Promise<void> {
+  const supabase = getSupabase()
   const { error } = await supabase
     .from('themes')
     .delete()
@@ -93,6 +99,7 @@ export async function deleteTheme(id: string): Promise<void> {
 }
 
 export async function setActiveTheme(id: string): Promise<void> {
+  const supabase = getSupabase()
   // First, deactivate all themes
   const { error: deactivateError } = await supabase
     .from('themes')

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -11,10 +11,11 @@ export default function AdminDashboard() {
     activeTheme: null as string | null
   })
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     async function loadStats() {
       try {
+        const supabase = getSupabase()
         const [themesRes, componentsRes, activeThemeRes] = await Promise.all([
           supabase.from('themes').select('id', { count: 'exact', head: true }),
           supabase.from('components').select('id', { count: 'exact', head: true }),
