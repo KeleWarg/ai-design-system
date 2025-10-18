@@ -82,10 +82,10 @@ export default function ComponentDetailPage() {
       <div className="border-b border-border">
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="flex gap-6">
-            {['preview', 'code', 'props', 'prompts'].map((tab) => (
+            {(['preview', 'code', 'props', 'prompts'] as const).map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab as any)}
+                onClick={() => setActiveTab(tab)}
                 className={`py-4 px-2 border-b-2 transition-colors capitalize ${
                   activeTab === tab
                     ? 'border-primary text-foreground font-medium'
@@ -158,7 +158,7 @@ export default function ComponentDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {component.props.map((prop: any, i: number) => (
+                    {component.props.map((prop: { name: string; type: string; default?: string; description: string }, i: number) => (
                       <tr key={i} className="border-t border-border">
                         <td className="px-4 py-3 text-sm font-mono">{prop.name}</td>
                         <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{prop.type}</td>
@@ -207,7 +207,7 @@ export default function ComponentDetailPage() {
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-3">Use Cases</h3>
                 <div className="space-y-4">
-                  {component.prompts.useCases.map((useCase: any, i: number) => (
+                  {component.prompts.useCases.map((useCase: { scenario: string; prompt: string; output?: string }, i: number) => (
                     <div key={i} className="p-4 bg-card border border-border rounded-lg">
                       <h4 className="font-medium text-foreground mb-2">{useCase.scenario}</h4>
                       <p className="text-sm text-muted-foreground mb-3">Prompt: &quot;{useCase.prompt}&quot;</p>
