@@ -367,19 +367,30 @@ export default function EditComponentPage() {
           </div>
           
           {/* Live Preview Link */}
-          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-            <p className="text-sm font-medium text-foreground mb-2">👁️ View Live Component:</p>
-            <p className="text-xs text-muted-foreground mb-3">
-              See this component rendered with all variants on the public docs page
-            </p>
-            <a
-              href={`/docs/components/${component.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium"
-            >
-              Open Live Preview →
-            </a>
+          <div className="p-6 bg-gradient-to-r from-purple-500/10 to-primary/10 border-2 border-primary/30 rounded-lg space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="text-3xl">👁️</div>
+              <div className="flex-1">
+                <p className="text-base font-semibold text-foreground mb-2">View Live Interactive Component</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  See this component fully rendered with all variants, hover states, and theme styling on the docs page.
+                </p>
+                <a
+                  href={`/docs/components/${component.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium"
+                >
+                  Open Live Preview →
+                </a>
+              </div>
+            </div>
+            
+            <div className="pt-3 border-t border-border/50">
+              <p className="text-xs text-muted-foreground">
+                💡 The live preview shows the real component with interactive variant toggles, not just code snippets.
+              </p>
+            </div>
           </div>
         </div>
         

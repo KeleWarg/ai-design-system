@@ -608,15 +608,31 @@ export default function NewComponentPage() {
               </div>
             </div>
             
-            {/* Next Steps */}
-            <div className="p-4 bg-muted rounded-lg space-y-2">
-              <p className="text-sm font-medium text-foreground">📝 Next Steps:</p>
-              <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-                <li>Review the component name and code above</li>
-                <li>Click "Save Component" below</li>
-                <li>View live preview at <code className="text-primary">/docs/components/{formData.slug}</code></li>
-                <li>Test all variants interactively on the docs page</li>
-              </ol>
+            {/* Live Interactive Preview Note */}
+            <div className="p-6 bg-gradient-to-r from-purple-500/10 to-primary/10 border-2 border-primary/30 rounded-lg space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="text-3xl">👁️</div>
+                <div className="flex-1">
+                  <p className="text-base font-semibold text-foreground mb-2">See Your Component Live!</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    The rendered component with all interactive variants will be available after you save. 
+                    You'll be able to toggle variants, test hover states, and see it with the applied theme.
+                  </p>
+                  <div className="bg-background/50 rounded-md p-3 border border-border">
+                    <p className="text-xs font-medium text-foreground mb-1">📍 Preview Location:</p>
+                    <code className="text-xs text-primary font-mono">
+                      /docs/components/{formData.slug}
+                    </code>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground">
+                  💡 <strong>Why no preview here?</strong> For security, we don't execute user-generated code in the admin panel. 
+                  The docs page uses your saved, validated components for safe rendering.
+                </p>
+              </div>
             </div>
           </div>
         )}
