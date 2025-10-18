@@ -1,7 +1,4 @@
 {
-  "buildCommand": "npm ci --prefer-offline --no-audit --no-fund && npm run build",
-  "installCommand": "npm ci --prefer-offline --no-audit --no-fund",
-  "devCommand": "npm run dev",
   "github": {
     "silent": true
   }
