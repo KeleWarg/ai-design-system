@@ -36,11 +36,15 @@ export const getSupabaseAdmin = () => {
 }
 
 // For backwards compatibility - client only
-export const supabase = getSupabase()
+// Use getSupabase() function instead to avoid build-time initialization
+let _cachedSupabase: SupabaseClient | null = null
+export const supabase = typeof window !== 'undefined'
+  ? (_cachedSupabase || (_cachedSupabase = getSupabase()))
+  : (null as unknown as SupabaseClient)
 
 // Server-side only - do NOT use in client components
 // Only call getSupabaseAdmin() in API routes or server components
-export const supabaseAdmin = typeof window === 'undefined' ? getSupabaseAdmin() : (null as unknown as SupabaseClient)
+export const supabaseAdmin = (null as unknown as SupabaseClient)
 
 // Types
 export type Theme = {
