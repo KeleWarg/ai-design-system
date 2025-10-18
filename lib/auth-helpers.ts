@@ -1,4 +1,4 @@
-import { createServerSupabaseClient, getCurrentUser, UserRole } from './supabase'
+import { getCurrentUser, UserRole } from './supabase'
 import { redirect } from 'next/navigation'
 
 export async function requireAuth() {
@@ -10,10 +10,16 @@ export async function requireAuth() {
 }
 
 export async function requireRole(role: UserRole) {
-  const user = await requireAuth()
+  const user = await getCurrentUser()
+  
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+  
   if (role === 'admin' && user.role !== 'admin') {
     throw new Error('Forbidden: Admin access required')
   }
+  
   return user
 }
 
