@@ -28,7 +28,6 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme | null>(null)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Load active theme from database
@@ -39,64 +38,56 @@ export function ThemeProvider({
           applyTheme(activeTheme)
           setThemeState(activeTheme)
         } else {
-          console.log('No active theme found')
+          console.log('No active theme found, using defaults')
         }
       } catch (error) {
         console.error('Error loading theme:', error)
         console.error('Continuing without database theme')
-      } finally {
-        setLoading(false)
       }
     }
 
     // Only load if we're in the browser
     if (typeof window !== 'undefined') {
       loadTheme()
-    } else {
-      setLoading(false)
-    }
 
-    // Subscribe to theme changes in real-time
-    const supabase = getSupabase()
-    const channel = supabase
-      .channel('theme-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'themes'
-        },
-        async () => {
-          // Reload active theme when any theme is updated
-          const activeTheme = await getActiveTheme()
-          if (activeTheme) {
-            applyTheme(activeTheme)
-            setThemeState(activeTheme)
+      // Subscribe to theme changes in real-time
+      const supabase = getSupabase()
+      const channel = supabase
+        .channel('theme-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'themes'
+          },
+          async () => {
+            // Reload active theme when any theme is updated
+            const activeTheme = await getActiveTheme()
+            if (activeTheme) {
+              applyTheme(activeTheme)
+              setThemeState(activeTheme)
+            }
           }
-        }
-      )
-      .subscribe()
+        )
+        .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
   }, [])
-  
+
   const setTheme = (newTheme: Theme) => {
     applyTheme(newTheme)
     setThemeState(newTheme)
   }
-  
+
   const value = {
     theme,
     setTheme,
   }
-  
-  if (loading) {
-    return <div className="min-h-screen bg-background" />
-  }
-  
+
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
       {children}
