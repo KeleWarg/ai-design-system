@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { generateComponentPrompt } from '@/lib/ai-prompts'
+import { getCurrentUser } from '@/lib/supabase'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -8,6 +9,15 @@ const anthropic = new Anthropic({
 
 export async function POST(request: Request) {
   try {
+    // Require authentication for AI generation
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
     const spec = await request.json()
 
     if (!process.env.ANTHROPIC_API_KEY) {

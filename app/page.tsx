@@ -23,8 +23,8 @@ export default function HomePage() {
                 </Link>
               </Button>
               <Button size="lg" variant="secondary" asChild>
-                <Link href="/admin">
-                  Admin Panel
+                <Link href="/admin/login">
+                  Admin Login
                 </Link>
               </Button>
             </div>
