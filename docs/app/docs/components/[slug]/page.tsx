@@ -127,16 +127,19 @@ export default function ComponentDetailPage() {
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-3">Installation</h3>
                 <div className="space-y-2">
-                  {component.installation.dependencies && component.installation.dependencies.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Dependencies:</p>
-                      <pre className="p-4 bg-muted rounded-lg overflow-x-auto">
-                        <code className="text-sm">
-                          npm install {component.installation.dependencies.join(' ')}
-                        </code>
-                      </pre>
-                    </div>
-                  )}
+                  {(() => {
+                    const installation = component.installation as { dependencies?: string[] }
+                    return installation.dependencies && installation.dependencies.length > 0 && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Dependencies:</p>
+                        <pre className="p-4 bg-muted rounded-lg overflow-x-auto">
+                          <code className="text-sm">
+                            npm install {installation.dependencies.join(' ')}
+                          </code>
+                        </pre>
+                      </div>
+                    )
+                  })()}
                 </div>
               </div>
             )}
@@ -175,60 +178,63 @@ export default function ComponentDetailPage() {
           </div>
         )}
         
-        {activeTab === 'prompts' && (
-          <div className="space-y-8">
-            {component.prompts.basic && component.prompts.basic.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-3">Basic Prompts</h3>
-                <ul className="space-y-2">
-                  {component.prompts.basic.map((prompt: string, i: number) => (
-                    <li key={i} className="p-3 bg-card border border-border rounded-lg text-sm">
-                      {prompt}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {component.prompts.advanced && component.prompts.advanced.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-3">Advanced Prompts</h3>
-                <ul className="space-y-2">
-                  {component.prompts.advanced.map((prompt: string, i: number) => (
-                    <li key={i} className="p-3 bg-card border border-border rounded-lg text-sm">
-                      {prompt}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {component.prompts.useCases && component.prompts.useCases.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-3">Use Cases</h3>
-                <div className="space-y-4">
-                  {component.prompts.useCases.map((useCase: { scenario: string; prompt: string; output?: string }, i: number) => (
-                    <div key={i} className="p-4 bg-card border border-border rounded-lg">
-                      <h4 className="font-medium text-foreground mb-2">{useCase.scenario}</h4>
-                      <p className="text-sm text-muted-foreground mb-3">Prompt: &quot;{useCase.prompt}&quot;</p>
-                      {useCase.output && (
-                        <pre className="p-3 bg-muted rounded text-xs overflow-x-auto">
-                          <code>{useCase.output}</code>
-                        </pre>
-                      )}
-                    </div>
-                  ))}
+        {activeTab === 'prompts' && (() => {
+          const prompts = component.prompts as { basic?: string[]; advanced?: string[]; useCases?: Array<{ scenario: string; prompt: string; output?: string }> }
+          return (
+            <div className="space-y-8">
+              {prompts.basic && prompts.basic.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Basic Prompts</h3>
+                  <ul className="space-y-2">
+                    {prompts.basic.map((prompt: string, i: number) => (
+                      <li key={i} className="p-3 bg-card border border-border rounded-lg text-sm">
+                        {prompt}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            )}
-            
-            {(!component.prompts.basic || component.prompts.basic.length === 0) &&
-             (!component.prompts.advanced || component.prompts.advanced.length === 0) &&
-             (!component.prompts.useCases || component.prompts.useCases.length === 0) && (
-              <p className="text-muted-foreground">No usage prompts available.</p>
-            )}
-          </div>
-        )}
+              )}
+
+              {prompts.advanced && prompts.advanced.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Advanced Prompts</h3>
+                  <ul className="space-y-2">
+                    {prompts.advanced.map((prompt: string, i: number) => (
+                      <li key={i} className="p-3 bg-card border border-border rounded-lg text-sm">
+                        {prompt}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {prompts.useCases && prompts.useCases.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Use Cases</h3>
+                  <div className="space-y-4">
+                    {prompts.useCases.map((useCase, i: number) => (
+                      <div key={i} className="p-4 bg-card border border-border rounded-lg">
+                        <h4 className="font-medium text-foreground mb-2">{useCase.scenario}</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Prompt: &quot;{useCase.prompt}&quot;</p>
+                        {useCase.output && (
+                          <pre className="p-3 bg-muted rounded text-xs overflow-x-auto">
+                            <code>{useCase.output}</code>
+                          </pre>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(!prompts.basic || prompts.basic.length === 0) &&
+               (!prompts.advanced || prompts.advanced.length === 0) &&
+               (!prompts.useCases || prompts.useCases.length === 0) && (
+                <p className="text-muted-foreground">No usage prompts available.</p>
+              )}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
