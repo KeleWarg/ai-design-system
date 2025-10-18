@@ -30,6 +30,61 @@ export default function NewComponentPage() {
   const [variantKey, setVariantKey] = useState('')
   const [variantValues, setVariantValues] = useState('')
   
+  // Image upload
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [extracting, setExtracting] = useState(false)
+  
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    // Show preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setUploadedImage(e.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+    
+    // Extract spec from image
+    setExtracting(true)
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      
+      const res = await fetch('/api/ai/extract-spec', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        // Populate form with extracted data
+        setFormData(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          slug: (data.name || prev.name).toLowerCase().replace(/\s+/g, '-'),
+          description: data.description || prev.description,
+          category: data.category || prev.category,
+          variants: data.variants || prev.variants
+        }))
+        
+        if (data.notes) {
+          alert(`Extracted! Additional notes: ${data.notes}`)
+        } else {
+          alert('✅ Spec extracted successfully! Review the form below.')
+        }
+      } else {
+        alert(data.error || 'Failed to extract spec from image')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Failed to extract spec from image')
+    } finally {
+      setExtracting(false)
+    }
+  }
+  
   async function handleGenerateCode() {
     if (!formData.name || !formData.description) {
       alert('Please provide name and description first')
@@ -176,10 +231,61 @@ export default function NewComponentPage() {
     <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Create Component</h1>
-        <p className="text-muted-foreground mt-1">Define a new component with AI assistance</p>
+        <p className="text-muted-foreground mt-1">Upload a spec sheet image or define manually</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Image Upload */}
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-2 border-dashed border-primary/30 rounded-lg p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                📸 Upload Spec Sheet (PNG)
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload a design spec or mockup - AI will extract component details automatically
+              </p>
+            </div>
+            <label className="cursor-pointer px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium">
+              {extracting ? '🤖 Extracting...' : '📤 Upload Image'}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleImageUpload}
+                disabled={extracting}
+                className="hidden"
+              />
+            </label>
+          </div>
+          
+          {uploadedImage && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium text-foreground">Uploaded Spec:</p>
+              <div className="relative rounded-lg overflow-hidden border-2 border-primary/30 bg-background">
+                <img 
+                  src={uploadedImage} 
+                  alt="Uploaded spec" 
+                  className="max-h-64 w-auto mx-auto"
+                />
+              </div>
+              {extracting && (
+                <div className="flex items-center gap-2 text-sm text-primary">
+                  <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                  <span>AI is reading your spec sheet...</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {!uploadedImage && (
+            <div className="text-center py-8 text-muted-foreground">
+              <div className="text-4xl mb-2">📄</div>
+              <p className="text-sm">No spec sheet uploaded yet</p>
+              <p className="text-xs mt-1">Supports PNG, JPG, JPEG, WebP</p>
+            </div>
+          )}
+        </div>
+        
         {/* Basic Info */}
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">
           <h2 className="text-xl font-semibold text-foreground">Basic Information</h2>
