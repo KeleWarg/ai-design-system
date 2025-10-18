@@ -59,21 +59,6 @@ export async function getCurrentUser(): Promise<User | null> {
   return data as User
 }
 
-// Legacy admin client for migrations (use sparingly)
-export function getSupabaseAdmin() {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(
-    supabaseUrl,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  )
-}
-
 // Types
 export type Theme = {
   id: string

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase'
 
 /**
  * Public API: List all themes
@@ -8,7 +8,7 @@ import { getSupabase } from '@/lib/supabase'
  */
 export async function GET() {
   try {
-    const supabase = getSupabase()
+    const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('themes')
       .select('*')

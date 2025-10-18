@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase'
 
 /**
  * Public API: Get theme by value
@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { value } = await params
 
-    const supabase = getSupabase()
+    const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('themes')
       .select('*')

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSupabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase'
 
 /**
  * Public API: List all components
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '100')
 
-    const supabase = getSupabase()
+    const supabase = await createServerSupabaseClient()
     let query = supabase
       .from('components')
       .select('*')
