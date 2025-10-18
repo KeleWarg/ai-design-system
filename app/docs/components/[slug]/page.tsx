@@ -136,28 +136,36 @@ export default function ComponentDetailPage() {
                 Examples of this component with different variant combinations
               </p>
               
-              {/* Type Variants (if exists) */}
-              {component.variants.Type && (
+              {/* Variant Variants (shadcn/ui style lowercase) */}
+              {(component.variants.variant || component.variants.Type) && (
                 <div className="mb-8 p-6 bg-card border border-border rounded-lg">
-                  <p className="text-sm font-semibold text-foreground mb-4">Type Variants</p>
+                  <p className="text-sm font-semibold text-foreground mb-4">Variant Types</p>
                   <div className="flex flex-wrap gap-4">
-                    {(component.variants.Type as string[]).map((type) => {
-                      // Map variant names to Tailwind classes
-                      const typeClasses = {
+                    {((component.variants.variant || component.variants.Type) as string[]).map((variantValue) => {
+                      // Map both old and new format to Tailwind classes
+                      const variantClasses = {
+                        // shadcn/ui style (lowercase)
+                        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+                        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+                        ghost: 'bg-transparent border-2 border-border text-foreground hover:bg-accent',
+                        outline: 'bg-transparent border-2 border-primary text-primary hover:bg-primary/10',
+                        destructive: 'bg-red-500 text-white hover:bg-red-600',
+                        link: 'text-primary underline-offset-4 hover:underline',
+                        // Old format (PascalCase - backward compatibility)
                         Primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
                         Secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
                         Ghost: 'bg-transparent border-2 border-border text-foreground hover:bg-accent',
                         White: 'bg-white text-black hover:bg-white/90 border border-border',
                         Destructive: 'bg-red-500 text-white hover:bg-red-600',
                         Outline: 'bg-transparent border-2 border-primary text-primary hover:bg-primary/10',
-                      }[type] || 'bg-primary text-primary-foreground'
+                      }[variantValue] || 'bg-primary text-primary-foreground'
                       
                       return (
                         <button
-                          key={type}
-                          className={`px-6 py-3 rounded-md font-medium transition-colors cursor-default ${typeClasses}`}
+                          key={variantValue}
+                          className={`px-6 py-3 rounded-md font-medium transition-colors cursor-default ${variantClasses}`}
                         >
-                          {type} {component.name}
+                          {variantValue.charAt(0).toUpperCase() + variantValue.slice(1)} {component.name}
                         </button>
                       )
                     })}
@@ -165,26 +173,33 @@ export default function ComponentDetailPage() {
                 </div>
               )}
               
-              {/* Size Variants (if exists) */}
-              {component.variants.Size && (
+              {/* Size Variants (both formats) */}
+              {(component.variants.size || component.variants.Size) && (
                 <div className="mb-8 p-6 bg-card border border-border rounded-lg">
                   <p className="text-sm font-semibold text-foreground mb-4">Size Variants</p>
                   <div className="flex flex-wrap items-center gap-4">
-                    {(component.variants.Size as string[]).map((size) => {
+                    {((component.variants.size || component.variants.Size) as string[]).map((sizeValue) => {
                       const sizeClasses = {
+                        // shadcn/ui style (lowercase)
+                        default: 'h-10 px-4 py-2 text-sm',
+                        sm: 'h-9 px-3 text-xs',
+                        lg: 'h-11 px-8 text-base',
+                        xl: 'h-12 px-10 text-lg',
+                        icon: 'h-10 w-10',
+                        // Old format (PascalCase - backward compatibility)
                         Small: 'px-3 py-1.5 text-xs',
                         Base: 'px-4 py-2 text-sm',
                         Medium: 'px-5 py-2.5 text-sm',
                         Large: 'px-6 py-3 text-base',
                         XLarge: 'px-8 py-4 text-lg',
-                      }[size] || 'px-4 py-2 text-sm'
+                      }[sizeValue] || 'px-4 py-2 text-sm'
                       
                       return (
                         <button
-                          key={size}
+                          key={sizeValue}
                           className={`bg-primary text-primary-foreground rounded-md font-medium transition-colors cursor-default hover:bg-primary/90 ${sizeClasses}`}
                         >
-                          {size}
+                          {sizeValue.charAt(0).toUpperCase() + sizeValue.slice(1)}
                         </button>
                       )
                     })}
@@ -192,27 +207,35 @@ export default function ComponentDetailPage() {
                 </div>
               )}
               
-              {/* State Variants (if exists) */}
-              {component.variants.State && (
+              {/* State Variants (both formats) */}
+              {(component.variants.state || component.variants.State) && (
                 <div className="mb-8 p-6 bg-card border border-border rounded-lg">
                   <p className="text-sm font-semibold text-foreground mb-4">State Variants</p>
                   <div className="flex flex-wrap gap-4">
-                    {(component.variants.State as string[]).map((state) => {
+                    {((component.variants.state || component.variants.State) as string[]).map((stateValue) => {
                       const stateClasses = {
+                        // shadcn/ui style (lowercase)
+                        enabled: 'bg-primary text-primary-foreground',
+                        hover: 'bg-primary/90 text-primary-foreground',
+                        focused: 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2',
+                        pressed: 'bg-primary/80 text-primary-foreground',
+                        disabled: 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed',
+                        active: 'bg-primary/95 text-primary-foreground',
+                        // Old format (PascalCase - backward compatibility)
                         Enabled: 'bg-primary text-primary-foreground',
                         Hover: 'bg-primary/90 text-primary-foreground',
                         Focused: 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2',
                         Pressed: 'bg-primary/80 text-primary-foreground',
                         Disabled: 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed',
                         Active: 'bg-primary/95 text-primary-foreground',
-                      }[state] || 'bg-primary text-primary-foreground'
+                      }[stateValue] || 'bg-primary text-primary-foreground'
                       
                       return (
                         <button
-                          key={state}
+                          key={stateValue}
                           className={`px-6 py-3 rounded-md font-medium transition-colors cursor-default ${stateClasses}`}
                         >
-                          {state}
+                          {stateValue.charAt(0).toUpperCase() + stateValue.slice(1)}
                         </button>
                       )
                     })}
@@ -220,21 +243,22 @@ export default function ComponentDetailPage() {
                 </div>
               )}
               
-              {/* Icon Variants (if exists) */}
-              {component.variants.Icon && (
+              {/* Icon Variants (both formats) */}
+              {(component.variants.icon || component.variants.Icon) && (
                 <div className="mb-8 p-6 bg-card border border-border rounded-lg">
                   <p className="text-sm font-semibold text-foreground mb-4">Icon Variants</p>
                   <div className="flex flex-wrap gap-4">
-                    {(component.variants.Icon as string[]).map((icon) => {
+                    {((component.variants.icon || component.variants.Icon) as string[]).map((iconValue) => {
+                      const displayValue = iconValue.charAt(0).toUpperCase() + iconValue.slice(1)
                       return (
                         <button
-                          key={icon}
+                          key={iconValue}
                           className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium transition-colors cursor-default hover:bg-primary/90 flex items-center gap-2"
                         >
-                          {icon === 'Left' && <span>←</span>}
-                          {icon} Icon
-                          {icon === 'Right' && <span>→</span>}
-                          {icon === 'None' && ''}
+                          {(iconValue === 'left' || iconValue === 'Left') && <span>←</span>}
+                          {displayValue} Icon
+                          {(iconValue === 'right' || iconValue === 'Right') && <span>→</span>}
+                          {(iconValue === 'none' || iconValue === 'None') && ''}
                         </button>
                       )
                     })}

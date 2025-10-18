@@ -69,15 +69,15 @@ export async function POST(request: Request) {
             },
             {
               type: 'text',
-              text: `Analyze this component specification image and extract the following information in JSON format:
+              text: `Analyze this component specification image and extract following information in shadcn/ui JSON format:
 
 {
   "name": "Component name (e.g., Button, Card, Badge)",
   "description": "What the component does",
   "category": "Category (one of: buttons, inputs, layout, navigation, feedback, data-display, overlays, other)",
   "variants": {
-    "VariantName": ["option1", "option2", "option3"],
-    "AnotherVariant": ["value1", "value2"]
+    "variant": ["default", "secondary", "outline", "ghost"],
+    "size": ["default", "sm", "lg"]
   },
   "colorMapping": {
     "specColor1": "themeToken",
@@ -100,16 +100,35 @@ IMPORTANT: Map all colors you see in the spec to the closest theme token:
 - The generated component will use CSS variables (var(--primary), var(--secondary), etc.) instead of hardcoded colors
 ` : ''}
 
-Rules:
+CRITICAL shadcn/ui Rules:
 1. Extract all visible variants and their options
-2. Variant names should be PascalCase (Type, Size, Color, etc.)
-3. Variant options should be PascalCase (Primary, Secondary, Small, Large, etc.)
-4. If you see colors, extract them AND map them to theme tokens in "colorMapping"
-5. If you see sizes, extract them as a Size variant
-6. Look for states like hover, active, disabled - add as State variant
-7. If category is unclear, use "other"
-8. Include all text, measurements, and specifications you can see
-${theme ? '9. CRITICAL: Provide accurate color mappings from spec colors to theme tokens' : ''}
+2. Variant names MUST be lowercase: variant, size, icon, state (NOT Type, Size, Icon, State!)
+3. Variant values MUST be lowercase: default, primary, secondary, sm, lg (NOT Default, Primary, Secondary, Small, Large!)
+4. Common variant patterns:
+   - variant: default, secondary, ghost, outline, destructive, link
+   - size: default, sm, lg, xl, icon
+   - state: enabled, hover, disabled, focused, pressed
+5. If you see colors, extract them AND map them to theme tokens in "colorMapping"
+6. If you see sizes, extract them as a "size" variant (lowercase!)
+7. Look for states like hover, active, disabled - add as "state" variant (lowercase!)
+8. If category is unclear, use "other"
+9. Include all text, measurements, and specifications you can see
+${theme ? '10. CRITICAL: Provide accurate color mappings from spec colors to theme tokens' : ''}
+
+Example Output:
+{
+  "name": "Button",
+  "description": "A clickable button component",
+  "category": "buttons",
+  "variants": {
+    "variant": ["default", "secondary", "ghost", "outline"],
+    "size": ["default", "sm", "lg"]
+  },
+  "colorMapping": {
+    "Primary": "primary",
+    "Secondary": "secondary"
+  }
+}
 
 Return ONLY valid JSON, no explanations or markdown.`
             }
