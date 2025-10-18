@@ -1,0 +1,26 @@
+{
+  "name": "ai-design-system",
+  "version": "1.0.0",
+  "description": "AI-powered Design System CMS built with Next.js and Supabase",
+  "private": true,
+  "scripts": {
+    "build": "cd docs && npm run build",
+    "start": "cd docs && npm run start",
+    "dev": "cd docs && npm run dev",
+    "install": "cd docs && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KeleWarg/ai-design-system.git"
+  },
+  "keywords": [
+    "design-system",
+    "cms",
+    "nextjs",
+    "supabase",
+    "ai",
+    "openai"
+  ],
+  "author": "KeleWarg",
+  "license": "MIT"
+}
