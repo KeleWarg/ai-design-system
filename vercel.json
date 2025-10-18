@@ -1,4 +1,8 @@
 {
+  "buildCommand": "cd docs && npm ci --prefer-offline --no-audit --no-fund && npm run build",
+  "outputDirectory": "docs/.next",
+  "installCommand": "cd docs && npm ci --prefer-offline --no-audit --no-fund",
+  "devCommand": "cd docs && npm run dev",
   "github": {
     "silent": true
   }
