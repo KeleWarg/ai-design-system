@@ -1,6 +1,11 @@
 {
-  "buildCommand": "cd docs && npm run build",
+  "buildCommand": "cd docs && npm ci --prefer-offline && npm run build",
   "outputDirectory": "docs/.next",
-  "installCommand": "cd docs && npm install",
-  "devCommand": "cd docs && npm run dev"
+  "installCommand": "cd docs && npm ci --prefer-offline",
+  "devCommand": "cd docs && npm run dev",
+  "functions": {
+    "docs/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
 }
