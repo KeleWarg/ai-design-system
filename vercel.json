@@ -1,8 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd docs && npm run build",
-  "devCommand": "cd docs && npm run dev",
-  "installCommand": "cd docs && npm install",
-  "framework": null,
-  "outputDirectory": "docs/.next"
+  "github": {
+    "silent": true
+  }
 }
