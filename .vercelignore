@@ -1,7 +1,7 @@
 # Exclude large files that aren't needed for deployment
-docs/node_modules/.cache
-docs/.next/cache
-docs/scripts
-docs/database
+node_modules/.cache
+.next/cache
+scripts
+database
 *.md
 !README.md
